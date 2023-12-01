@@ -4,7 +4,6 @@ Pkg.add("CSV")
 Pkg.add("DataFrames")
 Pkg.add("LinearAlgebra")
 Pkg.add("Statistics")
-Pkg.add("MultivariateStats")
 Pkg.add("Printf")
 Pkg.add("Plots")
 
@@ -13,7 +12,6 @@ using CSV
 using DataFrames
 using LinearAlgebra
 using Statistics
-using MultivariateStats
 using Printf
 using Plots
 
@@ -23,9 +21,11 @@ file_path = joinpath(pwd(), "data","turkiye-student-evaluation_R_Specific.csv")
 # read data as a DataFrame
 df = CSV.read(file_path, header=true, DataFrame)
 
+
 # our dataset has an index at the first column and the data starts from the second column
 # we need to extract the right data and rename it so it is right
-column_names = names(df)[1:end-1]
+column_names_before = names(df)[1:end]
+column_names = column_names_before[1:end-1]
 data = df[:, 2:end]
 rename!(data, Symbol.(column_names))
 
@@ -40,10 +40,10 @@ if !all(t <: Number for t in eltype.(eachcol(df)))
 end
 
 # we center and scale our data and create a covariance matrix
-data_matrix = Matrix(data)
+data_matrix = Matrix(data)'
 N, M = size(data_matrix)
-centered_scaled_data = (data_matrix .- mean(data_matrix, dims=1)) ./ std(data_matrix, dims=1)
-cov_data = centered_scaled_data' * centered_scaled_data / (N-1)
+centered_scaled_data = (data_matrix .- mean(data_matrix, dims=2)) ./ std(data_matrix, dims=2)
+cov_data = centered_scaled_data * centered_scaled_data' / (M-1)
 df_cov = DataFrame(cov_data, column_names)
 insertcols!(df_cov, 1, :Names => column_names)
 
@@ -56,20 +56,9 @@ show(df_cov)
 λ = reverse(λ)
 V = reverse(V, dims = 2)
 
-
-var_sum = sum(λ)
-
-print_info(λ)
-
-
-println("Standart deviation:  ", standart_deivation)
-println("Prportion of Variance: ", var_proportion)
-println("Cummulative proportion: ", cum_proportion)
-
-
 function print_info(λ)
-    standart_deivation = sqrt.(λ)
-    var_proportion = λ ./ var_sum
+    comp_sum = sum(λ)
+    var_proportion = λ ./ comp_sum
     cum_proportion = cumsum(var_proportion)
 
     println("\t\teigenvalue\t\tvariance.percent\tcummulative.variance.percent")
@@ -80,20 +69,49 @@ function print_info(λ)
     end
 end
 
-data_matrix = convert(Matrix{Float64}, data_matrix)
-pca_result = fit(PCA, data_matrix, maxoutdim=2)
-var_importance = pca_result.prinvars
+print_info(λ)
 
+function print_components(λ)
+    comp_sum = sum(λ)
+    println("Importance of components:")
+
+    for i in eachindex(λ)
+        print("PC", i, ":\t")
+    end
+    println("")
+    standart_deivation = sqrt.(λ)
+    print("Standart deviation:  ")
+    for i in eachindex(λ)
+        @printf("%.6f\t", standart_deivation[i])
+    end
+    println("")
+
+    var_proportion = λ ./ comp_sum
+    print("Prportion of Variance: ")
+    for i in eachindex(λ)
+        @printf("%.6f\t", var_proportion[i])
+    end
+    println("")
+
+    cumsum_proportion = cumsum(var_proportion)
+    println("Cummulative proportion: ")
+    for i in eachindex(λ)
+        @printf("%.6f\t", cumsum_proportion[i])
+    end
+    println("")
+
+end
+
+print_components(λ)
 
 dim2V = V[:, 1:2]
 
-t = centered_scaled_data * dim2V
-t2 = dim2V' * data_matrix
+t = dim2V' * centered_scaled_data
 
-t[1:10, :]
+t[:, 1:10]'
 
 plotly()
-scatter(t[:,1]', t[:,2]', legend=nothing)
+scatter(t[1, 1:10], t[2, 1:10], legend=nothing)
 
 
 
