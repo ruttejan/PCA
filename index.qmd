@@ -1,0 +1,182 @@
+---
+title: "PCA"
+author: "Jan Rutterle"
+bibliography: references.bib
+format:
+    revealjs:
+        theme: "white"
+        transition: "slide"
+        css: styles.css
+        html-math-method: mathjax
+        code-fold: true
+        echo: true
+jupyter: julia-1.9
+---
+
+# Úvod
+
+- PCA - Principal Component Analysis neboli analýza hlavních komponent je metoda lineární transformace dat
+- Využití má především pro:
+    * Kompresi dat
+    * Redukci dimenze
+    * Vizualizaci dat
+    * Rozpoznávání
+- V této prezentaci se zaměříme na redukci dimenze a vizualizaci
+
+# Data
+
+- Postup výpočtu budeme demonstrovat na databázi studentského hodnocení předmětů.
+- Tato databáze se skládá z 28 specifických otázek a 5 doplňujících atributech.
+- Popis otázek a atributů a samotnou databázi najdete [zde](https://archive.ics.uci.edu/dataset/262/turkiye+student+evaluation)
+
+# Popis postupu
+
+1. příprava dat
+2. kovarianční matice
+3. spektrální rozklad + zobrazení vlivu jednotlivých komponent
+5. vizualizace dat
+
+# Příprava dat
+
+## Knihovny
+- nejprve si připravíme všechny potřebné knihovny
+
+```{julia}
+#| code-fold: false
+
+using Pkg
+
+Pkg.add("CSV") # načtení databáze
+Pkg.add("DataFrames") # práce s databází
+Pkg.add("LinearAlgebra") # výpočet spektrálního rozkladu
+Pkg.add("Statistics") # výpočet kovarianční matice
+Pkg.add("Printf") # stylování výpisů
+Pkg.add("Plots") # vizualizace
+
+
+using CSV
+using DataFrames
+using LinearAlgebra
+using Statistics
+using Printf
+using Plots
+
+include("print_funcs.jl"); # funkce na výpis vlivu jednotlivých komponent
+```
+
+
+## Načtení dat a kontrola
+
+```{julia}
+
+# path to our dataset (.csv file)
+file_path = joinpath(pwd(), "data","turkiye-student-evaluation_generic.csv")
+
+# read data as a DataFrame
+df = CSV.read(file_path, header=true, DataFrame)
+
+# select the names of the columns for future use
+column_names = names(df)
+
+# we check that there are no missing values
+if all(ismissing, eachcol(df))
+    error("DataFrame have some Missing values!")
+else 
+    println("No value is missing.\n")
+end
+
+# we check that we are using only numerical values
+if !all(t <: Number for t in eltype.(eachcol(df)))
+    error("DataFrame has non-Numeric values!")
+else
+    println("All values are numeric.\n")
+end
+
+println(df[1:3, 1:7],"\n")
+println(df[1:3, 8:16],"\n")
+println(df[1:3, 17:25],"\n")
+println(df[1:3, 26:end],"\n")
+```
+
+# Kovarianční matice
+
+## Myšlenka
+
+## Výpočet
+
+```{julia}
+
+# we center and scale our data and create a covariance matrix
+data_matrix = Matrix(df)'
+N, M = size(data_matrix)
+centered_scaled_data = (data_matrix .- mean(data_matrix, dims=2)) ./ std(data_matrix, dims=2)
+cov_data = centered_scaled_data * centered_scaled_data' / (M-1)
+df_cov = DataFrame(cov_data, column_names)
+insertcols!(df_cov, 1, :Names => column_names)
+
+show(df_cov)
+```
+
+# Spektrální rozklad
+
+## Myšlenka
+
+## Výpočet
+
+```{julia}
+# calculate eigen values and eigen vectors
+λ, V = eigen(cov_data);
+# reverse them so the eigen values are in descending order
+λ = reverse(λ);
+V = reverse(V, dims = 2);
+
+print_info(λ)
+```
+
+## Vliv jednotlivých komponent
+
+```{julia}
+print_components(λ)
+```
+
+# Vizualizace dat
+
+## Otázky
+
+```{julia}
+
+cov_data2 = centered_scaled_data' * centered_scaled_data / (M-1);
+
+λ2, V2 = eigen(cov_data2);
+# reverse them so the eigen values are in descending order
+λ2 = reverse(λ2);
+V2 = reverse(V2, dims = 2);
+
+dim2V2 = V2[:, 1:2];
+t2 = centered_scaled_data * dim2V2;
+size(t2)
+x = t2[:, 1]';
+y = t2[:, 2]';
+scatter(x, y, legend=nothing)
+annotate!([(xi, yi, text(name, :bottom, 8)) for (xi, yi, name) in zip(x, y, column_names)])
+```
+
+## Studenti
+
+```{julia}
+dim2V = V[:, 1:2]
+
+t = dim2V' * centered_scaled_data
+
+scatter(t[1, 1:10], t[2, 1:10], legend=nothing)
+```
+
+## Studenti - Dim.5
+
+```{julia}
+dim5V = V[:, 1:5]
+
+d = dim5V' * centered_scaled_data
+
+d[:, 1:10]'
+```
