@@ -9,7 +9,7 @@ function print_info(λ)
     println("------------------------------------------------------------------------------------")
     for i in eachindex(λ)
         print("Dim.", i, "  ")
-        @printf(" \t%.6f\t\t%.6f\t\t\t\t%.6f\n", λ[i], var_proportion[i], cum_proportion[i])
+        @printf(" \t%.6f\t\t%.6f\t\t\t\t%.6f\n", λ[i], var_proportion[i]*100, cum_proportion[i]*100)
     end
 end
 
@@ -38,14 +38,14 @@ function print_components(λ)
         println("")
 
         var_proportion = λ ./ comp_sum
-        print("Prportion of Variance:\t")
+        print("Proportion of variance:\t")
         for i in beg:e
             @printf("%.6f\t", var_proportion[i])
         end
         println("")
 
         cumsum_proportion = cumsum(var_proportion)
-        print("Cummulative proportion:\t")
+        print("Cummulative variance:\t")
         for i in beg:e
             @printf("%.6f\t", cumsum_proportion[i])
         end
