@@ -49,15 +49,19 @@ show(df[1:3, 27:end])
 data_matrix = Matrix(df)'
 N, M = size(data_matrix)
 
-centered_scaled_data = (data_matrix .- mean(data_matrix, dims=2)) ./ std(data_matrix, dims=2)
-cov_data = centered_scaled_data * centered_scaled_data' / (M-1)
-df_cov = DataFrame(cov_data, column_names)
-insertcols!(df_cov, 1, :Names => column_names)
+centered_data = data_matrix .- mean(data_matrix, dims=2)
+centered_scaled_data = centered_data ./ std(data_matrix, dims=2)
 
-show(df_cov)
+cov_matrix = centered_data * centered_data' / (M-1)
+corr_matrix = centered_scaled_data * centered_scaled_data' / (M-1)
+
+df_corr = DataFrame(corr_matrix, column_names)
+insertcols!(df_corr, 1, :Names => column_names)
+
+show(df_corr)
 
 # calculate eigen values and eigen vectors
-λ, V = eigen(cov_data)
+λ, V = eigen(cov_matrix)
 # reverse them so the eigen values are in descending order
 λ = reverse(λ)
 V = reverse(V, dims = 2)
@@ -68,7 +72,10 @@ print_components(λ)
 
 dim2V = V[:, 1:2]
 
-t = dim2V' * centered_scaled_data
+t = dim2V' * centered_data
+
+
+
 
 
 
@@ -138,6 +145,8 @@ cov_data2 = centered_scaled_data' * centered_scaled_data / (M-1);
 # reverse them so the eigen values are in descending order
 λ2 = reverse(λ2);
 V2 = reverse(V2, dims = 2);
+
+
 
 dim2V2 = V2[:, 1:2];
 t2 = centered_scaled_data * dim2V2;

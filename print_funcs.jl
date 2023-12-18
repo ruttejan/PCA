@@ -50,6 +50,7 @@ function print_components(λ)
             @printf("%.6f\t", cumsum_proportion[i])
         end
         println("")
+        println("")
         beg += step 
         e = beg + step - 1
     end
