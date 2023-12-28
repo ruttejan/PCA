@@ -120,26 +120,29 @@ $$A=[a_1 \dots a_{5820}]$$
 
 $$ \bar{a} = \frac{a_1 + a_2 + \dots + a_{5820}}{5820} $$
 
-$$ a_i = a_i - \bar{a}$$
+$$ \bar{A} = [\frac{a_1 - \bar{a}}{5819} \dots \frac{a_{5820} - \bar{a}}{5819}] $$
 
 - Nyní můžeme vypočítat kovarianční matici otázek
 
-$$ Cov = AA^T / 5819$$
+$$ Cov = \bar{A} \bar{A}^T$$
 
 :::
 
 ## Korelační matice 
 
 ::: txt2
+
 - Pro vytvoření korelační matice musíme, kromě vycentrování, data ještě standardizovat (vydělit směrodatnou odchylkou)
-$$ \sigma_j = \sqrt{\frac{1}{5819} \sum_{i=1}^{5820} (a_{ij} - \bar{a_j})^2} $$
+$$ i = 1\dots 33 $$
+$$ j = 1\dots 5820 $$
+$$ \sigma_i = \sqrt{\frac{1}{5819} \sum_{j=1}^{5820} (a_{ij} - \bar{a_i})^2} $$
 
 - Směrodatná odchylka je v našem případě vektor o rozměru 33 (počet otázek)
-$$ a_{ij} = \frac{a_{ij}}{\sigma_j} $$
+$$ \hat{a}_{ij} = \frac{1}{5819}\frac{a_{ij} - \bar{a_i}}{\sigma_i} $$
 
 - Korelační matici potom vypočítáme stejně jako kovarianční matici
 
-$$ Corr = AA^T / 5819 $$
+$$ Corr = \hat{A}\hat{A}^T $$
 
 :::
 
@@ -167,8 +170,9 @@ show(df_corr)
 
 - Jakmile máme kovarinační matici, která je symetrická a semidefinitní, můžeme vypočítat spektrální rozklad
 
-$$ Corr/Cov = AA^T = V \Lambda V^T $$
+$$ Cov = \bar{A}\bar{A}^T = V \Lambda V^T $$
 
+- obdobně pro korelační matici (při použití $\hat{A}$)
 - funkce eigen() z balíčku LinearAlgebra nám vrátí vlastní čísla a jejich příslušné vektory ve vzestupném pořadí
 - Pro lepší náhled si je přerovnáme do sestupného pořadí
 
@@ -231,7 +235,7 @@ println(λ)
 ## Chyba jednotlivých dimenzí (Kovarianční matice) {style="font-size: 30px;"}
 
 ```{julia}
-print_info(λ)
+print_info(λcov)
 
 # variance.percent(dim = i) = λi / sum(λ)
 ```
@@ -239,7 +243,7 @@ print_info(λ)
 ## Vliv jednotlivých komponent (Kovarianční matice) {style="font-size: 30px;"}
 
 ```{julia}
-print_components(λ)
+print_components(λcov)
 ```
 
 
@@ -368,8 +372,8 @@ scatter(d[1, :], d[2, :], d[3, :], legend=nothing, ms=1)
 ## Otázky
 
 - Pro vizualizaci vlivu jednotlivých otázek na jednotlivé komponenty musíme vytvořit korelační matici jednotlivých studentů
-- Místo $AA^T$ uděláme:
-$$ A^TA $$
+- Místo $\hat{A}\hat{A}^T$ uděláme:
+$$ \hat{A}^T\hat{A} $$
 
 ## Otázky - graf
 
@@ -393,11 +397,16 @@ annotate!([(xi, yi, text(name, :bottom, 8)) for (xi, yi, name) in zip(x, y, colu
 
 
 # Závěr
+::: txt3
+
 - PCA je poměrně jednoduchá metoda pro práci i s velkými daty a může nám pomoct porozumět rozložení dat nebo třeba ke klasifikaci dat (v případě strojového učení)
 
-- Zde se nám povedlo promítnout body do prvních 2 dimenzí s chybou 25%, a do prvních 3 s chybou 22% (s Korelační maticí)
+- S Kovariařní maticí se nám povedlo promítnout body do prvních 2 dimenzí s chybou 20%, a do prvních 3 s chybou 16%
+- 10% chybu dostaneme už při použití pouze 6 komponent (dimenzí)
+- S Korelační maticí se nám povedlo promítnout body do prvních 2 dimenzí s chybou 25%, a do prvních 3 s chybou 22% 
+- 10% chybu dostaneme při použití 8 komponent (dimenzí)
 
-- Pro klasifikaci bychom mohli použít prvních 8 dimenzí s chybou už pouhých 10% (s Korelační maticí)
+:::
 
 # Bibliografie
 

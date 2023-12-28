@@ -581,22 +581,22 @@ All values are numeric.
 <li><p>Pro vytvoření kovarianční matice musíme data vycentrovat (odečíst průměr)</p></li>
 </ul>
 <p><span class="math display">\[ \bar{a} = \frac{a_1 + a_2 + \dots + a_{5820}}{5820} \]</span></p>
-<p><span class="math display">\[ a_i = a_i - \bar{a}\]</span></p>
+<p><span class="math display">\[ \bar{A} = [\frac{a_1 - \bar{a}}{5819} \dots \frac{a_{5820} - \bar{a}}{5819}] \]</span></p>
 <ul>
 <li>Nyní můžeme vypočítat kovarianční matici otázek</li>
 </ul>
-<p><span class="math display">\[ Cov = AA^T / 5819\]</span></p>
+<p><span class="math display">\[ Cov = \bar{A} \bar{A}^T\]</span></p>
 </div>
 </section>
 <section id="korelační-matice" class="slide level2">
 <h2>Korelační matice</h2>
 <div class="txt2">
 <ul>
-<li><p>Pro vytvoření korelační matice musíme, kromě vycentrování, data ještě standardizovat (vydělit směrodatnou odchylkou) <span class="math display">\[ \sigma_j = \sqrt{\frac{1}{5819} \sum_{i=1}^{5820} (a_{ij} - \bar{a_j})^2} \]</span></p></li>
-<li><p>Směrodatná odchylka je v našem případě vektor o rozměru 33 (počet otázek) <span class="math display">\[ a_{ij} = \frac{a_{ij}}{\sigma_j} \]</span></p></li>
+<li><p>Pro vytvoření korelační matice musíme, kromě vycentrování, data ještě standardizovat (vydělit směrodatnou odchylkou) <span class="math display">\[ i = 1\dots 33 \]</span> <span class="math display">\[ j = 1\dots 5820 \]</span> <span class="math display">\[ \sigma_i = \sqrt{\frac{1}{5819} \sum_{j=1}^{5820} (a_{ij} - \bar{a_i})^2} \]</span></p></li>
+<li><p>Směrodatná odchylka je v našem případě vektor o rozměru 33 (počet otázek) <span class="math display">\[ \hat{a}_{ij} = \frac{1}{5819}\frac{a_{ij} - \bar{a_i}}{\sigma_i} \]</span></p></li>
 <li><p>Korelační matici potom vypočítáme stejně jako kovarianční matici</p></li>
 </ul>
-<p><span class="math display">\[ Corr = AA^T / 5819 \]</span></p>
+<p><span class="math display">\[ Corr = \hat{A}\hat{A}^T \]</span></p>
 </div>
 </section>
 <section id="výpočet" class="slide level2">
@@ -658,8 +658,9 @@ All values are numeric.
 <ul>
 <li>Jakmile máme kovarinační matici, která je symetrická a semidefinitní, můžeme vypočítat spektrální rozklad</li>
 </ul>
-<p><span class="math display">\[ Corr/Cov = AA^T = V \Lambda V^T \]</span></p>
+<p><span class="math display">\[ Cov = \bar{A}\bar{A}^T = V \Lambda V^T \]</span></p>
 <ul>
+<li>obdobně pro korelační matici (při použití <span class="math inline">\(\hat{A}\)</span>)</li>
 <li>funkce eigen() z balíčku LinearAlgebra nám vrátí vlastní čísla a jejich příslušné vektory ve vzestupném pořadí</li>
 <li>Pro lepší náhled si je přerovnáme do sestupného pořadí</li>
 </ul>
@@ -826,46 +827,46 @@ Eigen values:
 <div class="cell" data-execution_count="8">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource julia number-lines code-with-copy"><code class="sourceCode julia"><span id="cb14-1"><a href="#cb14-1"></a><span class="fu">print_info</span>(λ)</span>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource julia number-lines code-with-copy"><code class="sourceCode julia"><span id="cb14-1"><a href="#cb14-1"></a><span class="fu">print_info</span>(λcov)</span>
 <span id="cb14-2"><a href="#cb14-2"></a></span>
 <span id="cb14-3"><a href="#cb14-3"></a><span class="co"># variance.percent(dim = i) = λi / sum(λ)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>            eigenvalue      variance.percent    cummulative.variance.percent
 ------------------------------------------------------------------------------------
-Dim.1       23.104345       70.013168               70.013168
-Dim.2       1.492966        4.524138                74.537307
-Dim.3       1.227301        3.719095                78.256401
-Dim.4       1.127135        3.415561                81.671962
-Dim.5       1.033536        3.131927                84.803889
-Dim.6       0.815444        2.471041                87.274930
-Dim.7       0.526619        1.595814                88.870744
-Dim.8       0.386726        1.171896                90.042640
-Dim.9       0.348741        1.056790                91.099430
-Dim.10      0.287329        0.870694                91.970124
-Dim.11      0.253200        0.767273                92.737397
-Dim.12      0.203442        0.616491                93.353888
-Dim.13      0.182936        0.554352                93.908240
-Dim.14      0.170508        0.516691                94.424931
-Dim.15      0.141749        0.429543                94.854474
-Dim.16      0.138024        0.418254                95.272728
-Dim.17      0.136343        0.413160                95.685887
-Dim.18      0.118749        0.359846                96.045734
-Dim.19      0.116190        0.352092                96.397825
-Dim.20      0.113826        0.344927                96.742752
-Dim.21      0.109232        0.331007                97.073759
-Dim.22      0.105442        0.319521                97.393280
-Dim.23      0.100284        0.303892                97.697171
-Dim.24      0.095207        0.288507                97.985678
-Dim.25      0.092587        0.280566                98.266244
-Dim.26      0.084560        0.256242                98.522485
-Dim.27      0.084228        0.255236                98.777721
-Dim.28      0.080077        0.242659                99.020380
-Dim.29      0.077312        0.234278                99.254658
-Dim.30      0.070718        0.214297                99.468954
-Dim.31      0.067641        0.204972                99.673926
-Dim.32      0.055777        0.169022                99.842948
-Dim.33      0.051827        0.157052                100.000000</code></pre>
+Dim.1       37.700327       58.810484               58.810484
+Dim.2       13.587497       21.195765               80.006249
+Dim.3       2.894755        4.515663                84.521912
+Dim.4       1.990134        3.104501                87.626414
+Dim.5       1.121557        1.749569                89.375983
+Dim.6       0.662197        1.032992                90.408975
+Dim.7       0.590087        0.920503                91.329478
+Dim.8       0.517051        0.806572                92.136050
+Dim.9       0.467169        0.728758                92.864808
+Dim.10      0.410619        0.640544                93.505352
+Dim.11      0.332727        0.519036                94.024388
+Dim.12      0.297963        0.464807                94.489195
+Dim.13      0.276623        0.431517                94.920712
+Dim.14      0.257495        0.401679                95.322391
+Dim.15      0.231120        0.360534                95.682925
+Dim.16      0.227463        0.354831                96.037755
+Dim.17      0.221359        0.345308                96.383064
+Dim.18      0.197095        0.307457                96.690521
+Dim.19      0.190160        0.296639                96.987160
+Dim.20      0.186274        0.290578                97.277738
+Dim.21      0.178721        0.278795                97.556533
+Dim.22      0.174033        0.271482                97.828015
+Dim.23      0.163640        0.255269                98.083284
+Dim.24      0.154830        0.241527                98.324811
+Dim.25      0.151392        0.236164                98.560975
+Dim.26      0.137315        0.214204                98.775179
+Dim.27      0.134842        0.210347                98.985526
+Dim.28      0.130170        0.203059                99.188584
+Dim.29      0.124363        0.193999                99.382583
+Dim.30      0.114081        0.177960                99.560543
+Dim.31      0.109610        0.170986                99.731529
+Dim.32      0.088766        0.138470                99.869999
+Dim.33      0.083337        0.130001                100.000000</code></pre>
 </div>
 </div>
 </section>
@@ -874,44 +875,44 @@ Dim.33      0.051827        0.157052                100.000000</code></pre>
 <div class="cell" data-execution_count="9">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource julia number-lines code-with-copy"><code class="sourceCode julia"><span id="cb16-1"><a href="#cb16-1"></a><span class="fu">print_components</span>(λ)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource julia number-lines code-with-copy"><code class="sourceCode julia"><span id="cb16-1"><a href="#cb16-1"></a><span class="fu">print_components</span>(λcov)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Importance of components:
                         PC1:        PC2:        PC3:        PC4:        PC5:        
-Standart deviation:     4.806698    1.221870    1.107836    1.061666    1.016630    
-Proportion of variance: 0.700132    0.045241    0.037191    0.034156    0.031319    
-Cummulative variance:   0.700132    0.745373    0.782564    0.816720    0.848039    
+Standart deviation:     6.140059    3.686122    1.701398    1.410721    1.059036    
+Proportion of variance: 0.588105    0.211958    0.045157    0.031045    0.017496    
+Cummulative variance:   0.588105    0.800062    0.845219    0.876264    0.893760    
 
                         PC6:        PC7:        PC8:        PC9:        PC10:       
-Standart deviation:     0.903019    0.725685    0.621873    0.590543    0.536031    
-Proportion of variance: 0.024710    0.015958    0.011719    0.010568    0.008707    
-Cummulative variance:   0.872749    0.888707    0.900426    0.910994    0.919701    
+Standart deviation:     0.813755    0.768171    0.719063    0.683497    0.640796    
+Proportion of variance: 0.010330    0.009205    0.008066    0.007288    0.006405    
+Cummulative variance:   0.904090    0.913295    0.921361    0.928648    0.935054    
 
                         PC11:       PC12:       PC13:       PC14:       PC15:       
-Standart deviation:     0.503190    0.451046    0.427710    0.412926    0.376496    
-Proportion of variance: 0.007673    0.006165    0.005544    0.005167    0.004295    
-Cummulative variance:   0.927374    0.933539    0.939082    0.944249    0.948545    
+Standart deviation:     0.576825    0.545860    0.525950    0.507440    0.480749    
+Proportion of variance: 0.005190    0.004648    0.004315    0.004017    0.003605    
+Cummulative variance:   0.940244    0.944892    0.949207    0.953224    0.956829    
 
                         PC16:       PC17:       PC18:       PC19:       PC20:       
-Standart deviation:     0.371515    0.369246    0.344600    0.340867    0.337381    
-Proportion of variance: 0.004183    0.004132    0.003598    0.003521    0.003449    
-Cummulative variance:   0.952727    0.956859    0.960457    0.963978    0.967428    
+Standart deviation:     0.476931    0.470488    0.443954    0.436073    0.431595    
+Proportion of variance: 0.003548    0.003453    0.003075    0.002966    0.002906    
+Cummulative variance:   0.960378    0.963831    0.966905    0.969872    0.972777    
 
                         PC21:       PC22:       PC23:       PC24:       PC25:       
-Standart deviation:     0.330503    0.324718    0.316677    0.308557    0.304281    
-Proportion of variance: 0.003310    0.003195    0.003039    0.002885    0.002806    
-Cummulative variance:   0.970738    0.973933    0.976972    0.979857    0.982662    
+Standart deviation:     0.422754    0.417173    0.404524    0.393485    0.389092    
+Proportion of variance: 0.002788    0.002715    0.002553    0.002415    0.002362    
+Cummulative variance:   0.975565    0.978280    0.980833    0.983248    0.985610    
 
                         PC26:       PC27:       PC28:       PC29:       PC30:       
-Standart deviation:     0.290792    0.290220    0.282980    0.278050    0.265928    
-Proportion of variance: 0.002562    0.002552    0.002427    0.002343    0.002143    
-Cummulative variance:   0.985225    0.987777    0.990204    0.992547    0.994690    
+Standart deviation:     0.370560    0.367209    0.360791    0.352651    0.337759    
+Proportion of variance: 0.002142    0.002103    0.002031    0.001940    0.001780    
+Cummulative variance:   0.987752    0.989855    0.991886    0.993826    0.995605    
 
                         PC31:       PC32:       PC33:       
-Standart deviation:     0.260078    0.236172    0.227656    
-Proportion of variance: 0.002050    0.001690    0.001571    
-Cummulative variance:   0.996739    0.998429    1.000000    
+Standart deviation:     0.331074    0.297936    0.288681    
+Proportion of variance: 0.001710    0.001385    0.001300    
+Cummulative variance:   0.997315    0.998700    1.000000    
 </code></pre>
 </div>
 </div>
@@ -933,8 +934,8 @@ Cummulative variance:   0.996739    0.998429    1.000000
 <span id="cb18-5"><a href="#cb18-5"></a><span class="fu">plotly</span>()</span>
 <span id="cb18-6"><a href="#cb18-6"></a><span class="fu">scatter</span>(t[<span class="fl">1</span>, <span class="op">:</span>], t[<span class="fl">2</span>, <span class="op">:</span>], legend<span class="op">=</span><span class="cn">nothing</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="11">
-    <div id="65dcfdb8-104c-4779-9667-b6d4eadd17c5" style="width:864px;height:384px;"></div>
+<div class="cell-output cell-output-display" data-execution_count="101">
+    <div id="04ef6ee0-1c67-4f69-a53d-1317eb45f28b" style="width:864px;height:384px;"></div>
     <script>
         requirejs.config({
         paths: {
@@ -943,7 +944,7 @@ Cummulative variance:   0.996739    0.998429    1.000000
     });
     require(['plotly'], function (Plotly) {
 
-    Plotly.newPlot('65dcfdb8-104c-4779-9667-b6d4eadd17c5', [
+    Plotly.newPlot('04ef6ee0-1c67-4f69-a53d-1317eb45f28b', [
     {
         "showlegend": true,
         "mode": "markers",
@@ -12785,8 +12786,8 @@ Cummulative variance:   0.996739    0.998429    1.000000
 <span id="cb19-29"><a href="#cb19-29"></a><span class="fu">scatter!</span>(t[<span class="fl">1</span>, indices_5], t[<span class="fl">2</span>,indices_5], color<span class="op">=:</span>orange, label<span class="op">=</span><span class="st">"5"</span>)</span>
 <span id="cb19-30"><a href="#cb19-30"></a><span class="fu">scatter!</span>(t[<span class="fl">1</span>, indices_other], t[<span class="fl">2</span>,indices_other], color<span class="op">=:</span>blue, label<span class="op">=</span><span class="st">"other"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="12">
-    <div id="7d88f880-9d32-4ae6-a32c-1ada68684023" style="width:864px;height:384px;"></div>
+<div class="cell-output cell-output-display" data-execution_count="102">
+    <div id="1a944607-d974-413a-af74-f99200c1e693" style="width:864px;height:384px;"></div>
     <script>
         requirejs.config({
         paths: {
@@ -12795,7 +12796,7 @@ Cummulative variance:   0.996739    0.998429    1.000000
     });
     require(['plotly'], function (Plotly) {
 
-    Plotly.newPlot('7d88f880-9d32-4ae6-a32c-1ada68684023', [
+    Plotly.newPlot('1a944607-d974-413a-af74-f99200c1e693', [
     {
         "showlegend": true,
         "mode": "markers",
@@ -24806,8 +24807,8 @@ Celkový počet bodů (1 - 5): 3690, relevantní četnost (%): 63.4020618556701<
 <span id="cb22-4"><a href="#cb22-4"></a></span>
 <span id="cb22-5"><a href="#cb22-5"></a><span class="fu">scatter</span>(d[<span class="fl">1</span>, <span class="op">:</span>], d[<span class="fl">2</span>, <span class="op">:</span>], d[<span class="fl">3</span>, <span class="op">:</span>], legend<span class="op">=</span><span class="cn">nothing</span>, ms<span class="op">=</span><span class="fl">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="14">
-    <div id="fb30935f-0035-40bc-86dc-53692e004c4e" style="width:864px;height:384px;"></div>
+<div class="cell-output cell-output-display" data-execution_count="104">
+    <div id="f318ed85-80a3-45df-a868-7fe893ae43f2" style="width:864px;height:384px;"></div>
     <script>
         requirejs.config({
         paths: {
@@ -24816,7 +24817,7 @@ Celkový počet bodů (1 - 5): 3690, relevantní četnost (%): 63.4020618556701<
     });
     require(['plotly'], function (Plotly) {
 
-    Plotly.newPlot('fb30935f-0035-40bc-86dc-53692e004c4e', [
+    Plotly.newPlot('f318ed85-80a3-45df-a868-7fe893ae43f2', [
     {
         "showlegend": true,
         "mode": "markers",
@@ -42504,8 +42505,8 @@ Celkový počet bodů (1 - 5): 3690, relevantní četnost (%): 63.4020618556701<
 <span id="cb23-5"><a href="#cb23-5"></a><span class="fu">plotly</span>()</span>
 <span id="cb23-6"><a href="#cb23-6"></a><span class="fu">scatter</span>(t[<span class="fl">1</span>, <span class="op">:</span>], t[<span class="fl">2</span>, <span class="op">:</span>], legend<span class="op">=</span><span class="cn">nothing</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="15">
-    <div id="8d042451-06a3-46f4-b395-ae7455eacf9d" style="width:864px;height:384px;"></div>
+<div class="cell-output cell-output-display" data-execution_count="105">
+    <div id="5c5e650b-7267-4bd1-9ca9-e51654d4a0a0" style="width:864px;height:384px;"></div>
     <script>
         requirejs.config({
         paths: {
@@ -42514,7 +42515,7 @@ Celkový počet bodů (1 - 5): 3690, relevantní četnost (%): 63.4020618556701<
     });
     require(['plotly'], function (Plotly) {
 
-    Plotly.newPlot('8d042451-06a3-46f4-b395-ae7455eacf9d', [
+    Plotly.newPlot('5c5e650b-7267-4bd1-9ca9-e51654d4a0a0', [
     {
         "showlegend": true,
         "mode": "markers",
@@ -54325,8 +54326,8 @@ Celkový počet bodů (1 - 5): 3690, relevantní četnost (%): 63.4020618556701<
 <span id="cb24-4"><a href="#cb24-4"></a></span>
 <span id="cb24-5"><a href="#cb24-5"></a><span class="fu">scatter</span>(d[<span class="fl">1</span>, <span class="op">:</span>], d[<span class="fl">2</span>, <span class="op">:</span>], d[<span class="fl">3</span>, <span class="op">:</span>], legend<span class="op">=</span><span class="cn">nothing</span>, ms<span class="op">=</span><span class="fl">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="16">
-    <div id="7980f60b-fd44-46b1-aa34-24b6f3c9acd3" style="width:864px;height:384px;"></div>
+<div class="cell-output cell-output-display" data-execution_count="106">
+    <div id="f7bcbe54-a308-49a8-bddc-eca241979ce4" style="width:864px;height:384px;"></div>
     <script>
         requirejs.config({
         paths: {
@@ -54335,7 +54336,7 @@ Celkový počet bodů (1 - 5): 3690, relevantní četnost (%): 63.4020618556701<
     });
     require(['plotly'], function (Plotly) {
 
-    Plotly.newPlot('7980f60b-fd44-46b1-aa34-24b6f3c9acd3', [
+    Plotly.newPlot('f7bcbe54-a308-49a8-bddc-eca241979ce4', [
     {
         "showlegend": true,
         "mode": "markers",
@@ -72011,7 +72012,7 @@ Celkový počet bodů (1 - 5): 3690, relevantní četnost (%): 63.4020618556701<
 <h2>Otázky</h2>
 <ul>
 <li>Pro vizualizaci vlivu jednotlivých otázek na jednotlivé komponenty musíme vytvořit korelační matici jednotlivých studentů</li>
-<li>Místo <span class="math inline">\(AA^T\)</span> uděláme: <span class="math display">\[ A^TA \]</span></li>
+<li>Místo <span class="math inline">\(\hat{A}\hat{A}^T\)</span> uděláme: <span class="math display">\[ \hat{A}^T\hat{A} \]</span></li>
 </ul>
 </section>
 <section id="otázky---graf" class="slide level2">
@@ -72034,8 +72035,8 @@ Celkový počet bodů (1 - 5): 3690, relevantní četnost (%): 63.4020618556701<
 <span id="cb25-13"><a href="#cb25-13"></a><span class="fu">scatter</span>(x, y, legend<span class="op">=</span><span class="cn">nothing</span>)</span>
 <span id="cb25-14"><a href="#cb25-14"></a><span class="fu">annotate!</span>([(xi, yi, <span class="fu">text</span>(name, <span class="op">:</span>bottom, <span class="fl">8</span>)) for (xi, yi, name) <span class="kw">in</span> <span class="fu">zip</span>(x, y, column_names)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="17">
-    <div id="673de29b-7439-4c18-8fb0-83be68b42079" style="width:864px;height:384px;"></div>
+<div class="cell-output cell-output-display" data-execution_count="107">
+    <div id="5c939b14-d3c7-4a11-a3bb-9c929a1a6042" style="width:864px;height:384px;"></div>
     <script>
         requirejs.config({
         paths: {
@@ -72044,7 +72045,7 @@ Celkový počet bodů (1 - 5): 3690, relevantní četnost (%): 63.4020618556701<
     });
     require(['plotly'], function (Plotly) {
 
-    Plotly.newPlot('673de29b-7439-4c18-8fb0-83be68b42079', [
+    Plotly.newPlot('5c939b14-d3c7-4a11-a3bb-9c929a1a6042', [
     {
         "showlegend": true,
         "mode": "markers",
@@ -73691,11 +73692,15 @@ Celkový počet bodů (1 - 5): 3690, relevantní četnost (%): 63.4020618556701<
 </section></section>
 <section id="závěr" class="title-slide slide level1 center">
 <h1>Závěr</h1>
+<div class="txt3">
 <ul>
 <li><p>PCA je poměrně jednoduchá metoda pro práci i s velkými daty a může nám pomoct porozumět rozložení dat nebo třeba ke klasifikaci dat (v případě strojového učení)</p></li>
-<li><p>Zde se nám povedlo promítnout body do prvních 2 dimenzí s chybou 25%, a do prvních 3 s chybou 22% (s Korelační maticí)</p></li>
-<li><p>Pro klasifikaci bychom mohli použít prvních 8 dimenzí s chybou už pouhých 10% (s Korelační maticí)</p></li>
+<li><p>S Kovariařní maticí se nám povedlo promítnout body do prvních 2 dimenzí s chybou 20%, a do prvních 3 s chybou 16%</p></li>
+<li><p>10% chybu dostaneme už při použití pouze 6 komponent (dimenzí)</p></li>
+<li><p>S Korelační maticí se nám povedlo promítnout body do prvních 2 dimenzí s chybou 25%, a do prvních 3 s chybou 22%</p></li>
+<li><p>10% chybu dostaneme při použití 8 komponent (dimenzí)</p></li>
 </ul>
+</div>
 </section>
 
 <section id="bibliografie" class="title-slide slide level1 smaller scrollable">
