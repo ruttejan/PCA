@@ -4,8 +4,8 @@ author: "Jan Rutterle"
 bibliography: references.bib
 format:
     revealjs:
-        theme: "white"
-        transition: "slide"
+        theme: white
+        transition: slide
         css: styles.css
         html-math-method: mathjax
         code-fold: true
@@ -13,37 +13,40 @@ format:
         fig-height: 4
         fig-width: 9
         fig-align: center
+        slide-number: true
+        chalkboard: true
+execute: 
+  eval: true
 jupyter: julia-1.9
 ---
 
 # Úvod
 
-- PCA - Principal Component Analysis neboli analýza hlavních komponent je metoda lineární transformace dat
-- Využití má především pro:
-    * Kompresi dat
-    * Redukci dimenze
-    * Vizualizaci dat
-    * Rozpoznávání
-- V této prezentaci se zaměříme na redukci dimenze a vizualizaci
+-   PCA - Principal Component Analysis neboli analýza hlavních komponent je metoda lineární transformace dat
+-   Využití má především pro:
+    -   Kompresi dat
+    -   Redukci dimenze
+    -   Vizualizaci dat
+    -   Rozpoznávání
+-   V této prezentaci se zaměříme na redukci dimenze a vizualizaci
 
 # Data
-
-- Postup výpočtu budeme demonstrovat na databázi studentského hodnocení předmětů.
-- Tato databáze se skládá z 28 specifických otázek a 5 doplňujících atributů (tedy 33 proměných).
-- Popis otázek a atributů a samotnou databázi najdete zde: [@GunduzFokoue:2013]
+-   Postup výpočtu budeme demonstrovat na databázi studentského hodnocení předmětů.
+-   Tato databáze se skládá z 28 specifických otázek a 5 doplňujících atributů (tedy 33 proměných).
+-   Popis otázek a atributů a samotnou databázi najdete zde: [@GunduzFokoue:2013]
 
 # Popis postupu
 
-1. příprava dat
-2. kovarianční/korelační matice
-3. spektrální rozklad + zobrazení vlivu jednotlivých komponent
-4. vizualizace dat 
-[@RPubs]
+1.  příprava dat
+2.  kovarianční/korelační matice
+3.  spektrální rozklad + zobrazení vlivu jednotlivých komponent
+4.  vizualizace dat [@RPubs]
 
 # Příprava dat
 
 ## Knihovny
-- nejprve si připravíme všechny potřebné knihovny
+
+-   nejprve si připravíme všechny potřebné knihovny
 
 ```{julia}
 #| code-fold: false
@@ -53,8 +56,8 @@ using Pkg
 Pkg.add("CSV") # načtení databáze
 Pkg.add("DataFrames") # práce s databází
 Pkg.add("LinearAlgebra") # výpočet spektrálního rozkladu
-Pkg.add("Statistics") # výpočet kovarianční matice
-Pkg.add("Printf") # stylování výpisů
+Pkg.add("Statistics") # výpočet kovarianční/korelační matice
+Pkg.add("Printf") # úprava výpisů
 Pkg.add("Plots") # vizualizace
 
 
@@ -68,39 +71,29 @@ using Plots
 include("print_funcs.jl"); # funkce na výpis vlivu jednotlivých komponent
 ```
 
-
 ## Načtení dat a kontrola
 
 ::: txt2
-- Abychom mohli provést výpočet PCA, musíme ověřit, že nám nechybí žádná data a všechny prvky jsou čísla.
-- Naše data mají 33 sloupců (otázek) a 5820 řádků (studentů)
+-   Abychom mohli provést výpočet PCA, musíme ověřit, že nám nechybí žádná data a všechny prvky jsou čísla.
+-   Naše data mají 33 sloupců (otázek) a 5820 řádků (studentů)
 :::
 
 ```{julia}
 
 # path to our dataset (.csv file)
 file_path = joinpath(pwd(), "data","turkiye-student-evaluation_generic.csv")
-
 # read data as a DataFrame
 df = CSV.read(file_path, header=true, DataFrame)
-
 # select the names of the columns for future use
 column_names = names(df)
-
 # we check that there are no missing values
-if all(ismissing, eachcol(df))
-    error("DataFrame have some Missing values!")
-else 
-    println("No value is missing.\n")
+if all(ismissing, eachcol(df)) error("DataFrame have some Missing values!")
+else println("No value is missing.\n")
 end
-
 # we check that we are using only numerical values
-if !all(t <: Number for t in eltype.(eachcol(df)))
-    error("DataFrame has non-Numeric values!")
-else
-    println("All values are numeric.\n")
+if !all(t <: Number for t in eltype.(eachcol(df))) error("DataFrame has non-Numeric values!")
+else println("All values are numeric.\n")
 end
-
 println(df[1:3, 1:7],"\n")
 println(df[1:3, 8:16],"\n")
 println(df[1:3, 17:25],"\n")
@@ -111,39 +104,31 @@ println(df[1:3, 26:end],"\n")
 
 ## Kovarianční matice
 
-::: txt2
+::: {.r-fit-text}
+-   Jak můžeme vidět z výpisu, jednotlivá hodnocení studentů máme jako řádkové věktory. Proto musíme nejprve data transponovat, abychom měli matici v požadovaném tvaru, tudíž jako matici s odpovědmi studentů jako sloupcové vektory: $$A=[a_1 \dots a_{5820}]$$
 
-- Jak můžeme vidět z výpisu, jednotlivá hodnocení studentů máme jako řádkové věktory. Proto musíme nejprve data transponovat, abychom měli matici v požadovaném tvaru, tudíž jako matici s odpovědmi studentů jako sloupcové vektory: 
-$$A=[a_1 \dots a_{5820}]$$
-
-- Pro vytvoření kovarianční matice musíme data vycentrovat (odečíst průměr)
+-   Pro vytvoření kovarianční matice musíme data vycentrovat (odečíst průměr)
 
 $$ \bar{a} = \frac{a_1 + a_2 + \dots + a_{5820}}{5820} $$
 
 $$ \bar{A} = [\frac{a_1 - \bar{a}}{5819} \dots \frac{a_{5820} - \bar{a}}{5819}] $$
 
-- Nyní můžeme vypočítat kovarianční matici otázek
+-   Nyní můžeme vypočítat kovarianční matici otázek
 
 $$ Cov = \bar{A} \bar{A}^T$$
 
 :::
 
-## Korelační matice 
+## Korelační matice
 
 ::: txt2
+-   Pro vytvoření korelační matice musíme, kromě vycentrování, data ještě standardizovat (vydělit směrodatnou odchylkou) $$ i = 1\dots 33 $$ $$ j = 1\dots 5820 $$ $$ \sigma_i = \sqrt{\frac{1}{5819} \sum_{j=1}^{5820} (a_{ij} - \bar{a_i})^2} $$
 
-- Pro vytvoření korelační matice musíme, kromě vycentrování, data ještě standardizovat (vydělit směrodatnou odchylkou)
-$$ i = 1\dots 33 $$
-$$ j = 1\dots 5820 $$
-$$ \sigma_i = \sqrt{\frac{1}{5819} \sum_{j=1}^{5820} (a_{ij} - \bar{a_i})^2} $$
+-   Směrodatná odchylka je v našem případě vektor o rozměru 33 (počet otázek) $$ \hat{a}_{ij} = \frac{1}{5819}\frac{a_{ij} - \bar{a_i}}{\sigma_i} $$
 
-- Směrodatná odchylka je v našem případě vektor o rozměru 33 (počet otázek)
-$$ \hat{a}_{ij} = \frac{1}{5819}\frac{a_{ij} - \bar{a_i}}{\sigma_i} $$
-
-- Korelační matici potom vypočítáme stejně jako kovarianční matici
+-   Korelační matici potom vypočítáme stejně jako kovarianční matici
 
 $$ Corr = \hat{A}\hat{A}^T $$
-
 :::
 
 ## Výpočet
@@ -168,15 +153,58 @@ show(df_corr)
 
 ## Myšlenka
 
-- Jakmile máme kovarinační matici, která je symetrická a semidefinitní, můžeme vypočítat spektrální rozklad
+-   Jakmile máme kovarinační matici, která je symetrická a semidefinitní, můžeme vypočítat spektrální rozklad
 
 $$ Cov = \bar{A}\bar{A}^T = V \Lambda V^T $$
 
-- obdobně pro korelační matici (při použití $\hat{A}$)
-- funkce eigen() z balíčku LinearAlgebra nám vrátí vlastní čísla a jejich příslušné vektory ve vzestupném pořadí
-- Pro lepší náhled si je přerovnáme do sestupného pořadí
+-   obdobně pro korelační matici (při použití $\hat{A}$)
+-   funkce eigen() z balíčku LinearAlgebra nám vrátí vlastní čísla a jejich příslušné vektory ve vzestupném pořadí
+-   Pro lepší náhled si je přerovnáme do sestupného pořadí
+
+## Výpočet (Kovarianční matice)
+
+
+```{julia}
+# calculate eigen values and eigen vectors
+λcov, Vcov = eigen(cov_matrix);
+# reverse them so the eigen values are in descending order
+λcov = reverse(λcov);
+Vcov = reverse(Vcov, dims = 2);
+
+@printf("Size of lambda: %d\n", size(λcov)[1])
+@printf("Size of V: %d %d\n", size(Vcov)[1], size(Vcov)[2])
+println("Eigen values:")
+println(λcov)
+```
+
+## Chyba jednotlivých dimenzí (Kovarianční matice) {style="font-size: 30px;"}
+
+::: txt
+-   Pro každou komponentu (dimenzi) nově vzniklé matice můžeme určit procentuální hodnotu, jak dobře aproximuje původní prostor
+-  Tuto hodnotu můžeme určit jako poměr vlastního čísla a součtu všech vlastních čísel
+-  V našem případě tedy pro dimenzi i: $\frac{\lambda_i}{\sum_{j=1}^{33} \lambda_j}$
+-  Můžeme si všimnout, že už s využitím pouze 3 prvních komponent (tedy 3 dimenzí) máme chybu pouze 15%
+:::
+
+```{julia}
+print_info(λcov)
+
+# variance.percent(dim = i) = λi / sum(λ)
+```
+
+## Vliv jednotlivých komponent (Kovarianční matice) {style="font-size: 30px;"}
+
+::: txt2
+-   směrodatná odchylka i-té komponenty je $\sqrt{\lambda_i}$
+:::
+
+```{julia}
+print_components(λcov)
+```
 
 ## Výpočet (Korelační matice)
+
+-   To samé, co jsme udělali na předešlých slidech, můžeme provést i s korelační maticí.
 
 ```{julia}
 # calculate eigen values and eigen vectors
@@ -195,9 +223,7 @@ println(λ)
 
 ::: txt2
 
-- Pro každou komponentu (dimenzi) nově vzniklé matice můžeme určit procentuální hodnotu, jak dobře aproximuje původní prostor
-- Lze vidět, že už s využitím pouze 5 prvních komponent (tedy 5 dimenzí) máme chybu pouze 15%
-
+-   Zde si všimněme, že pro chybu 15% potřebujeme použít 5 komponent (dimenzí)
 :::
 
 ```{julia}
@@ -208,46 +234,40 @@ print_info(λ)
 
 ## Vliv jednotlivých komponent (Korelační matice) {style="font-size: 30px;"}
 
-::: txt2
-- směrodatná odchylka i-té komponenty je $\sqrt{\lambda_i}$
-:::
-
 ```{julia}
 print_components(λ)
 ```
 
-## Výpočet (Kovarianční matice)
 
-- To samé, co jsme udělali na předešlých slidech, můžeme provést i s kovarianční maticí.
-```{julia}
-# calculate eigen values and eigen vectors
-λcov, Vcov = eigen(cov_matrix);
-# reverse them so the eigen values are in descending order
-λcov = reverse(λcov);
-Vcov = reverse(Vcov, dims = 2);
+# Vizualizace dat
 
-@printf("Size of lambda: %d\n", size(λcov)[1])
-@printf("Size of V: %d %d\n", size(Vcov)[1], size(Vcov)[2])
-println("Eigen values:")
-println(λ)
-```
-
-## Chyba jednotlivých dimenzí (Kovarianční matice) {style="font-size: 30px;"}
+## Studenti - graf (Kovarianční matice) {.h2-smaller}
 
 ```{julia}
-print_info(λcov)
+dim2V = Vcov[:, 1:2]
 
-# variance.percent(dim = i) = λi / sum(λ)
+t = dim2V' * centered_data
+
+plotly()
+scatter(t[1, :], t[2, :], legend=nothing)
 ```
 
-## Vliv jednotlivých komponent (Kovarianční matice) {style="font-size: 30px;"}
+## Studenti (Kovarianční matice)
+
+-   V tomto případě se data rozdělila do 13 přímek
+-   Když si vypíšeme původní hodnoty pro každou z přímek zvlášť, zjistíme, že se jedná o rozdělení prodle předmětů.
+-   První řádek (ze shora) obsahuje pouze předměty s označením 13 a předměty jsou seřazené v sestupném pořadí
+
+## Studenti 3.dim (Kovarianční matice) {.h2-smaller}
 
 ```{julia}
-print_components(λcov)
+dim3V = Vcov[:, 1:3]
+
+d = dim3V' * centered_data
+
+scatter(d[1, :], d[2, :], d[3, :], legend=nothing, ms=1)
 ```
 
-
-# Vizualizace dat {style="font-size: 28px;"}
 
 ## Studenti - graf (Korelační matice) {.h2-smaller}
 
@@ -262,12 +282,11 @@ scatter(t[1, :], t[2, :], legend=nothing)
 
 ## Studenti (Korelační matice)
 
-- Na předchozím obrázku můžeme vidět vizualizaci odpovědí jednotlivých studentů ve 2 dimenzích
-- Všimněme si, že v datech se objevuje 5 shluků (clusterů)
-- Pokud si vypíšeme původní hodnoty odpovědí pro studenty z každého clusteru, zjistíme, že téměř všechny odpovědi byly vždy stejné
-- V prvním clusteru (nejvíce vpravo) mají odpovědi na otázky Q1-Q28 hodnotu 1, pro druhý 2 atd.
-- Body si můžeme obarvit podle průměru odpovědí na tyto otázky
-
+-   Na předchozím obrázku můžeme vidět vizualizaci odpovědí jednotlivých studentů ve 2 dimenzích
+-   Všimněme si, že v datech se objevuje 5 shluků (clusterů)
+-   Pokud si vypíšeme původní hodnoty odpovědí pro studenty z každého clusteru, zjistíme, že téměř všechny odpovědi byly vždy stejné
+-   V prvním clusteru (nejvíce vpravo) mají odpovědi na otázky Q1-Q28 hodnotu 1, pro druhý 2 atd.
+-   Body si můžeme obarvit podle průměru odpovědí na tyto otázky
 
 ## Studenti - obarveno (Korelační matice) {.h2-smaller}
 
@@ -343,37 +362,10 @@ d = dim3V' * centered_scaled_data
 scatter(d[1, :], d[2, :], d[3, :], legend=nothing, ms=1)
 ```
 
-
-## Studenti - graf (Kovarianční matice) {.h2-smaller}
-
-```{julia}
-dim2V = Vcov[:, 1:2]
-
-t = dim2V' * centered_data
-
-plotly()
-scatter(t[1, :], t[2, :], legend=nothing)
-```
-
-## Studenti (Kovarianční matice)
-- V tomto případě se data rozdělila do 13 přímek
-- Když si vypíšeme původní hodnoty pro každou z přímek zvlášť, zjistíme, že se jedná o rozdělení prodle předmětů.
-- První řádek (ze shora) obsahuje pouze předměty s označením 13 a předměty jsou seřazené v sestupném pořadí
-
-## Studenti 3.dim (Kovarianční matice) {.h2-smaller}
-```{julia}
-dim3V = Vcov[:, 1:3]
-
-d = dim3V' * centered_data
-
-scatter(d[1, :], d[2, :], d[3, :], legend=nothing, ms=1)
-```
-
 ## Otázky
 
-- Pro vizualizaci vlivu jednotlivých otázek na jednotlivé komponenty musíme vytvořit korelační matici jednotlivých studentů
-- Místo $\hat{A}\hat{A}^T$ uděláme:
-$$ \hat{A}^T\hat{A} $$
+-   Pro vizualizaci vlivu jednotlivých otázek na jednotlivé komponenty musíme vytvořit korelační matici jednotlivých studentů
+-   Místo $\hat{A}\hat{A}^T$ uděláme: $$ \hat{A}^T\hat{A} $$
 
 ## Otázky - graf
 
@@ -395,17 +387,18 @@ scatter(x, y, legend=nothing)
 annotate!([(xi, yi, text(name, :bottom, 8)) for (xi, yi, name) in zip(x, y, column_names)])
 ```
 
-
 # Závěr
+
 ::: txt3
+-   PCA je poměrně jednoduchá metoda pro práci i s velkými daty a může nám pomoct porozumět rozložení dat nebo třeba pro úpravu dat ve strojovém učení
 
-- PCA je poměrně jednoduchá metoda pro práci i s velkými daty a může nám pomoct porozumět rozložení dat nebo třeba ke klasifikaci dat (v případě strojového učení)
+-   S kovariařní maticí se nám povedlo promítnout body do prvních 2 dimenzí s chybou 20%, a do prvních 3 s chybou 16%
 
-- S Kovariařní maticí se nám povedlo promítnout body do prvních 2 dimenzí s chybou 20%, a do prvních 3 s chybou 16%
-- 10% chybu dostaneme už při použití pouze 6 komponent (dimenzí)
-- S Korelační maticí se nám povedlo promítnout body do prvních 2 dimenzí s chybou 25%, a do prvních 3 s chybou 22% 
-- 10% chybu dostaneme při použití 8 komponent (dimenzí)
+-   10% chybu dostaneme už při použití pouze 6 komponent (dimenzí)
 
+-   S korelační maticí se nám povedlo promítnout body do prvních 2 dimenzí s chybou 25%, a do prvních 3 s chybou 22%
+
+-   10% chybu dostaneme při použití 8 komponent (dimenzí)
 :::
 
 # Bibliografie
