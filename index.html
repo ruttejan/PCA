@@ -574,11 +574,11 @@ All values are numeric.
 <li><p>Pro vytvoření kovarianční matice musíme data vycentrovat (odečíst průměr)</p></li>
 </ul>
 <p><span class="math display">\[ \bar{a} = \frac{a_1 + a_2 + \dots + a_{5820}}{5820} \]</span></p>
-<p><span class="math display">\[ \bar{A} = [\frac{a_1 - \bar{a}}{5819} \dots \frac{a_{5820} - \bar{a}}{5819}] \]</span></p>
+<p><span class="math display">\[ \bar{A} = [(a_1 - \bar{a}) \dots (a_{5820} - \bar{a})] \]</span></p>
 <ul>
 <li>Nyní můžeme vypočítat kovarianční matici otázek</li>
 </ul>
-<p><span class="math display">\[ Cov = \bar{A} \bar{A}^T\]</span></p>
+<p><span class="math display">\[ Cov = \frac{1}{5819}\bar{A} \bar{A}^T\]</span></p>
 </div>
 </section>
 <section id="korelační-matice" class="slide level2">
@@ -586,10 +586,10 @@ All values are numeric.
 <div class="txt2">
 <ul>
 <li><p>Pro vytvoření korelační matice musíme, kromě vycentrování, data ještě standardizovat (vydělit směrodatnou odchylkou) <span class="math display">\[ i = 1\dots 33 \]</span> <span class="math display">\[ j = 1\dots 5820 \]</span> <span class="math display">\[ \sigma_i = \sqrt{\frac{1}{5819} \sum_{j=1}^{5820} (a_{ij} - \bar{a_i})^2} \]</span></p></li>
-<li><p>Směrodatná odchylka je v našem případě vektor o rozměru 33 (počet otázek) <span class="math display">\[ \hat{a}_{ij} = \frac{1}{5819}\frac{a_{ij} - \bar{a_i}}{\sigma_i} \]</span></p></li>
+<li><p>Směrodatná odchylka je v našem případě vektor o rozměru 33 (počet otázek) <span class="math display">\[ \hat{a}_{ij} = \frac{a_{ij} - \bar{a_i}}{\sigma_i} \]</span></p></li>
 <li><p>Korelační matici potom vypočítáme stejně jako kovarianční matici</p></li>
 </ul>
-<p><span class="math display">\[ Corr = \hat{A}\hat{A}^T \]</span></p>
+<p><span class="math display">\[ Corr = \frac{1}{5819}\hat{A}\hat{A}^T \]</span></p>
 </div>
 </section>
 <section id="výpočet" class="slide level2">
@@ -934,8 +934,8 @@ Cummulative variance:   0.996739    0.998429    1.000000
 <span id="cb18-5"><a href="#cb18-5"></a><span class="fu">plotly</span>()</span>
 <span id="cb18-6"><a href="#cb18-6"></a><span class="fu">scatter</span>(t[<span class="fl">1</span>, <span class="op">:</span>], t[<span class="fl">2</span>, <span class="op">:</span>], legend<span class="op">=</span><span class="cn">nothing</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="13">
-    <div id="87511bb0-b835-49f8-9ce1-7b001f64d307" style="width:864px;height:384px;"></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+    <div id="969cc280-1e53-4d08-ba22-529ea67d846a" style="width:864px;height:384px;"></div>
     <script>
         requirejs.config({
         paths: {
@@ -944,7 +944,7 @@ Cummulative variance:   0.996739    0.998429    1.000000
     });
     require(['plotly'], function (Plotly) {
 
-    Plotly.newPlot('87511bb0-b835-49f8-9ce1-7b001f64d307', [
+    Plotly.newPlot('969cc280-1e53-4d08-ba22-529ea67d846a', [
     {
         "showlegend": true,
         "mode": "markers",
@@ -12755,8 +12755,8 @@ Cummulative variance:   0.996739    0.998429    1.000000
 <span id="cb19-4"><a href="#cb19-4"></a></span>
 <span id="cb19-5"><a href="#cb19-5"></a><span class="fu">scatter</span>(d[<span class="fl">1</span>, <span class="op">:</span>], d[<span class="fl">2</span>, <span class="op">:</span>], d[<span class="fl">3</span>, <span class="op">:</span>], legend<span class="op">=</span><span class="cn">nothing</span>, ms<span class="op">=</span><span class="fl">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="14">
-    <div id="1251492c-1f0b-4972-afc3-9fcfaf33a7d5" style="width:864px;height:384px;"></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+    <div id="9ddd0830-570b-4f35-ba53-9a8146ae17af" style="width:864px;height:384px;"></div>
     <script>
         requirejs.config({
         paths: {
@@ -12765,7 +12765,7 @@ Cummulative variance:   0.996739    0.998429    1.000000
     });
     require(['plotly'], function (Plotly) {
 
-    Plotly.newPlot('1251492c-1f0b-4972-afc3-9fcfaf33a7d5', [
+    Plotly.newPlot('9ddd0830-570b-4f35-ba53-9a8146ae17af', [
     {
         "showlegend": true,
         "mode": "markers",
@@ -30449,8 +30449,8 @@ Cummulative variance:   0.996739    0.998429    1.000000
 <span id="cb20-5"><a href="#cb20-5"></a><span class="fu">plotly</span>()</span>
 <span id="cb20-6"><a href="#cb20-6"></a><span class="fu">scatter</span>(t[<span class="fl">1</span>, <span class="op">:</span>], t[<span class="fl">2</span>, <span class="op">:</span>], legend<span class="op">=</span><span class="cn">nothing</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="15">
-    <div id="65bf1729-e121-4e79-811c-f529ff10f11d" style="width:864px;height:384px;"></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+    <div id="b64d693c-9627-43c6-96ee-24997a891cef" style="width:864px;height:384px;"></div>
     <script>
         requirejs.config({
         paths: {
@@ -30459,7 +30459,7 @@ Cummulative variance:   0.996739    0.998429    1.000000
     });
     require(['plotly'], function (Plotly) {
 
-    Plotly.newPlot('65bf1729-e121-4e79-811c-f529ff10f11d', [
+    Plotly.newPlot('b64d693c-9627-43c6-96ee-24997a891cef', [
     {
         "showlegend": true,
         "mode": "markers",
@@ -42301,8 +42301,8 @@ Cummulative variance:   0.996739    0.998429    1.000000
 <span id="cb21-29"><a href="#cb21-29"></a><span class="fu">scatter!</span>(t[<span class="fl">1</span>, indices_5], t[<span class="fl">2</span>,indices_5], color<span class="op">=:</span>orange, label<span class="op">=</span><span class="st">"5"</span>)</span>
 <span id="cb21-30"><a href="#cb21-30"></a><span class="fu">scatter!</span>(t[<span class="fl">1</span>, indices_other], t[<span class="fl">2</span>,indices_other], color<span class="op">=:</span>blue, label<span class="op">=</span><span class="st">"other"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="16">
-    <div id="10703dec-1194-43a9-a495-958bfa859661" style="width:864px;height:384px;"></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+    <div id="7c2f22df-b633-4686-b572-d38eebfc0db7" style="width:864px;height:384px;"></div>
     <script>
         requirejs.config({
         paths: {
@@ -42311,7 +42311,7 @@ Cummulative variance:   0.996739    0.998429    1.000000
     });
     require(['plotly'], function (Plotly) {
 
-    Plotly.newPlot('10703dec-1194-43a9-a495-958bfa859661', [
+    Plotly.newPlot('7c2f22df-b633-4686-b572-d38eebfc0db7', [
     {
         "showlegend": true,
         "mode": "markers",
@@ -54322,8 +54322,8 @@ Celkový počet bodů (1 - 5): 3690, relevantní četnost (%): 63.4020618556701<
 <span id="cb24-4"><a href="#cb24-4"></a></span>
 <span id="cb24-5"><a href="#cb24-5"></a><span class="fu">scatter</span>(d[<span class="fl">1</span>, <span class="op">:</span>], d[<span class="fl">2</span>, <span class="op">:</span>], d[<span class="fl">3</span>, <span class="op">:</span>], legend<span class="op">=</span><span class="cn">nothing</span>, ms<span class="op">=</span><span class="fl">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="18">
-    <div id="7d3449f9-7895-4a70-a9c5-954252ef90b0" style="width:864px;height:384px;"></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+    <div id="3cd51938-079f-4a9b-bca6-8e8cf996fa9e" style="width:864px;height:384px;"></div>
     <script>
         requirejs.config({
         paths: {
@@ -54332,7 +54332,7 @@ Celkový počet bodů (1 - 5): 3690, relevantní četnost (%): 63.4020618556701<
     });
     require(['plotly'], function (Plotly) {
 
-    Plotly.newPlot('7d3449f9-7895-4a70-a9c5-954252ef90b0', [
+    Plotly.newPlot('3cd51938-079f-4a9b-bca6-8e8cf996fa9e', [
     {
         "showlegend": true,
         "mode": "markers",
@@ -72035,8 +72035,8 @@ Celkový počet bodů (1 - 5): 3690, relevantní četnost (%): 63.4020618556701<
 <span id="cb25-13"><a href="#cb25-13"></a><span class="fu">scatter</span>(x, y, legend<span class="op">=</span><span class="cn">nothing</span>)</span>
 <span id="cb25-14"><a href="#cb25-14"></a><span class="fu">annotate!</span>([(xi, yi, <span class="fu">text</span>(name, <span class="op">:</span>bottom, <span class="fl">8</span>)) for (xi, yi, name) <span class="kw">in</span> <span class="fu">zip</span>(x, y, column_names)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="19">
-    <div id="eed824c5-7c11-4856-ab3b-4b8d38fbede8" style="width:864px;height:384px;"></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+    <div id="43264b20-36a6-46d4-a42d-a005eba78e99" style="width:864px;height:384px;"></div>
     <script>
         requirejs.config({
         paths: {
@@ -72045,7 +72045,7 @@ Celkový počet bodů (1 - 5): 3690, relevantní četnost (%): 63.4020618556701<
     });
     require(['plotly'], function (Plotly) {
 
-    Plotly.newPlot('eed824c5-7c11-4856-ab3b-4b8d38fbede8', [
+    Plotly.newPlot('43264b20-36a6-46d4-a42d-a005eba78e99', [
     {
         "showlegend": true,
         "mode": "markers",

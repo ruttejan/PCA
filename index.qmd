@@ -111,11 +111,11 @@ println(df[1:3, 26:end],"\n")
 
 $$ \bar{a} = \frac{a_1 + a_2 + \dots + a_{5820}}{5820} $$
 
-$$ \bar{A} = [\frac{a_1 - \bar{a}}{5819} \dots \frac{a_{5820} - \bar{a}}{5819}] $$
+$$ \bar{A} = [(a_1 - \bar{a}) \dots (a_{5820} - \bar{a})] $$
 
 -   Nyní můžeme vypočítat kovarianční matici otázek
 
-$$ Cov = \bar{A} \bar{A}^T$$
+$$ Cov = \frac{1}{5819}\bar{A} \bar{A}^T$$
 
 :::
 
@@ -124,11 +124,12 @@ $$ Cov = \bar{A} \bar{A}^T$$
 ::: txt2
 -   Pro vytvoření korelační matice musíme, kromě vycentrování, data ještě standardizovat (vydělit směrodatnou odchylkou) $$ i = 1\dots 33 $$ $$ j = 1\dots 5820 $$ $$ \sigma_i = \sqrt{\frac{1}{5819} \sum_{j=1}^{5820} (a_{ij} - \bar{a_i})^2} $$
 
--   Směrodatná odchylka je v našem případě vektor o rozměru 33 (počet otázek) $$ \hat{a}_{ij} = \frac{1}{5819}\frac{a_{ij} - \bar{a_i}}{\sigma_i} $$
+-   Směrodatná odchylka je v našem případě vektor o rozměru 33 (počet otázek) 
+$$ \hat{a}_{ij} = \frac{a_{ij} - \bar{a_i}}{\sigma_i} $$
 
 -   Korelační matici potom vypočítáme stejně jako kovarianční matici
 
-$$ Corr = \hat{A}\hat{A}^T $$
+$$ Corr = \frac{1}{5819}\hat{A}\hat{A}^T $$
 :::
 
 ## Výpočet
